@@ -9,6 +9,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UrlRepository extends JpaRepository<Url,Long> {
 
-    @Query(nativeQuery = true, value = "select * from url where short_url = :url ")
-    Url checkExistingUrl(@Param("url") String shorturl);
+    Url findByShortUrl(@Param("url") String shorturl);
 }

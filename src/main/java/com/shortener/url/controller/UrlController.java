@@ -19,7 +19,7 @@ public class UrlController {
     @Autowired
     UrlService urlService;
 
-    @PostMapping("/url")
+    @PostMapping(value = "/url", produces = )
     public ResponseEntity<Url> createUrl(@RequestBody String longUrl){
         return new ResponseEntity(urlService.createUrl(longUrl), HttpStatus.CREATED);
     }

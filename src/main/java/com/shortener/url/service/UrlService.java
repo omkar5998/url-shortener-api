@@ -28,7 +28,7 @@ public class UrlService {
         calendar.add(Calendar.HOUR_OF_DAY, 5);
 
         String shortUrl = validateUrl(longUrl);
-        Url url = urlRepository.checkExistingUrl(shortUrl);
+        Url url = urlRepository.findByShortUrl(shortUrl);
 
         if (ObjectUtils.isEmpty(url))
             url = new Url();
@@ -56,7 +56,7 @@ public class UrlService {
     }
 
     public String redirectUrl(String shortUrl) throws MalformedURLException {
-        Url url = urlRepository.checkExistingUrl(shortUrl);
+        Url url = urlRepository.findByShortUrl(shortUrl);
         return url.getLongUrl();
     }
 }
