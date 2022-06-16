@@ -8,31 +8,27 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.Date;
 
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "url")
-public class Url{
-
+@Data
+@Table(name = "user_subscription_rlt")
+public class UserSubscriptionRlt{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
-    private Long id;
-
-    @Column(name = "long_url")
-    private String longUrl;
-
-    @Column(name = "url_hash")
-    private String urlHash;
+    private Long userSubsNum;
 
     @Column(name = "user_num")
     private Long userNum;
+
+    @Column(name = "subsNum")
+    private Long subsNum;
 
     @Column(name = "created_stp")
     private Date createdStp;
 
     @Column(name = "expiration_stp")
     private Date expirationStp;
-
 }

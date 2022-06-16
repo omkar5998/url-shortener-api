@@ -1,7 +1,10 @@
 package com.shortener.url.service;
 
 import com.google.common.hash.Hashing;
+import com.shortener.url.constants.UrlConstants;
 import com.shortener.url.domain.Url;
+import com.shortener.url.mapper.UrlResponseVO;
+import com.shortener.url.mapper.UrlShortenRequest;
 import com.shortener.url.repository.UrlRepository;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class UrlService {
@@ -21,29 +22,50 @@ public class UrlService {
     @Autowired
     UrlRepository urlRepository;
 
-    public Url createUrl(String longUrl) {
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.HOUR_OF_DAY, 5);
-
-        String shortUrl = validateUrl(longUrl);
-        Url url = urlRepository.findByShortUrl(shortUrl);
-
-        if (ObjectUtils.isEmpty(url))
-            url = new Url();
-        url = saveUrl(longUrl, calendar, shortUrl, url);
-        return url;
+    public UrlService(UrlRepository urlRepository) {
+        this.urlRepository = urlRepository;
     }
 
-    private Url saveUrl(String longUrl, Calendar calendar, String shortUrl, Url url) {
-        url.setLongUrl(longUrl);
-        url.setShortUrl(shortUrl);
-        url.setCreatedTime(new Date());
-        url.setExpirationTime(calendar.getTime());
+    public UrlResponseVO createShortUrl(UrlShortenRequest urlShortenRequest) {
+
+        String urlHash = validateUrl(urlShortenRequest.getLongUrl());
+        Url url = urlRepository.findByUrlHash(urlHash);
+
+        if (ObjectUtils.isEmpty(url)) {
+            return saveUrl(urlShortenRequest, urlHash);
+        }
+        return getFinalUrl(urlHash);
+    }
+
+    private UrlResponseVO getFinalUrl(String urlHash) {
+        String stringBuilder = UrlConstants.RequestMappingConstants.GET_API_PATH + urlHash;
+        return new UrlResponseVO(stringBuilder);
+    }
+
+    private Calendar getCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.HOUR_OF_DAY, UrlConstants.OtherConstants.FREE_TIER_DURATION); // Free Tier Service
+        return calendar;
+    }
+
+    private UrlResponseVO saveUrl(UrlShortenRequest urlShortenRequest, String urlHash) {
+
+        Url url = new Url();
+        url.setLongUrl(urlShortenRequest.getLongUrl());
+        url.setUrlHash(urlHash);
+        url.setCreatedStp(new Date());
+        url.setExpirationStp(getCalendar().getTime());
+        url.setUserNum(checkUser(urlShortenRequest.getUserId()));
         url = urlRepository.saveAndFlush(url);
-        url.setShortUrl("http://localhost:8080/" + shortUrl);
-        return url;
+        return getFinalUrl(url.getUrlHash());
+    }
+
+    public Long checkUser(String userId){
+        if(ObjectUtils.isEmpty(userId))
+            return -1L;
+        return urlRepository.getUserNum(userId);
+
     }
 
     private String validateUrl(String longUrl) {
@@ -55,8 +77,8 @@ public class UrlService {
         }
     }
 
-    public String redirectUrl(String shortUrl) throws MalformedURLException {
-        Url url = urlRepository.findByShortUrl(shortUrl);
+    public String redirectUrl(String urlHash) throws MalformedURLException {
+        Url url = urlRepository.findByUrlHash(urlHash);
         return url.getLongUrl();
     }
 }
