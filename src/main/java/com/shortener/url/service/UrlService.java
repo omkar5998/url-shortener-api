@@ -10,8 +10,6 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
@@ -75,10 +73,5 @@ public class UrlService {
         } else {
             throw new RuntimeException("Invalid Url " + longUrl);
         }
-    }
-
-    public String redirectUrl(String urlHash) throws MalformedURLException {
-        Url url = urlRepository.findByUrlHash(urlHash);
-        return url.getLongUrl();
     }
 }
