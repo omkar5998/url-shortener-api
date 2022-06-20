@@ -2,7 +2,9 @@ package com.shortener.url.service;
 
 import com.shortener.url.constants.TestConstants;
 import com.shortener.url.domain.Url;
+import com.shortener.url.framework.BusinessException;
 import com.shortener.url.mapper.UrlResponseVO;
+import com.shortener.url.mapper.UrlShortenRequest;
 import com.shortener.url.repository.UrlRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -53,5 +56,14 @@ public class UrlServiceTests {
         UrlResponseVO urlResponse = urlService.createShortUrl(TestConstants.getUrlShortenRequest());
 
         assertEquals(TestConstants.getUrlResponse(), urlResponse);
+    }
+
+    @Test
+    @DisplayName("Create Short Url : Invalid Url")
+    void createShortUrlInvalidUrl() {
+
+        assertThrows(RuntimeException.class, () -> {
+            urlService.createShortUrl(new UrlShortenRequest("http", ""));
+        });
     }
 }
